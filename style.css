@@ -1,0 +1,71 @@
+body {
+
+    background-color: #1a1a1a;
+
+    color: #ff4d4d;
+
+    font-family: "Courier New", monospace;
+
+    text-align: center;
+
+    padding: 40px;
+
+  }
+
+  
+
+  button {
+
+    background-color: #e60000;
+
+    color: white;
+
+    border: none;
+
+    padding: 15px 30px;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+    border-radius: 8px;
+
+    transition: background 0.3s ease;
+
+  }
+
+  
+
+  button:hover {
+
+    background-color: #ff1a1a;
+
+  }
+
+  
+
+  .hidden {
+
+    display: none;
+
+  }
+
+  
+
+  #lyrics {
+
+    margin-top: 30px;
+
+    font-size: 20px;
+
+    line-height: 1.6;
+
+  }
+
+  
+
+  #player {
+
+    margin-top: 20px;
+
+  }

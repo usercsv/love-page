@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>С Первомаем, дорогая!</title>
+  <style>
+    /* Основные стили и анимации */
+    @keyframes victory-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+        transform: translate(0, 0) scale(1);
+      }
+      50% {
+        box-shadow: 0 0 20px 10px rgba(76, 175, 80, 0.5);
+        transform: translate(0, 0) scale(1.05);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+        transform: translate(0, 0) scale(1);
+      }
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+    
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255, 77, 77, 0.8);
+      }
+      100% {
+        box-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+      }
+    }
+    
+    body {
+      background-color: #1a1a1a;
+      color: #ff4d4d;
+      font-family: "Arial", sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0,0 L100,0 L100,100 L0,100 Z' fill='%231a1a1a'/%3E%3Cpath d='M20,20 L25,15 L30,20 L25,25 Z' fill='%23cc0000' opacity='0.3'/%3E%3Ccircle cx='75' cy='25' r='5' fill='%23cc0000' opacity='0.3'/%3E%3Ccircle cx='25' cy='75' r='5' fill='%23cc0000' opacity='0.3'/%3E%3Cpath d='M70,70 L75,65 L80,70 L75,75 Z' fill='%23cc0000' opacity='0.3'/%3E%3C/svg%3E");
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: rgba(30, 30, 30, 0.9);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+      animation: glow 3s infinite;
+    }
+
+    h1 {
+      color: #ff4d4d;
+      font-size: 36px;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    button {
+      background-color: #e60000;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+    }
+    
+    button:hover, button:active {
+      background-color: #ff1a1a;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    #lyrics {
+      margin-top: 30px;
+      font-size: 20px;
+      line-height: 1.6;
+      background-color: rgba(30, 30, 30, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+      opacity: 0;
+      transition: opacity 1s ease;
+      display: none;
+    }
+
+    #lyrics.visible {
+      opacity: 1;
+      display: block;
+    }
+    
+    .typing-text {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  transition: width 0.5s ease, opacity 0.5s ease-in-out;
+}
+    
+/* Добавляем плавность появления */
+.typing-text.visible {
+  width: 100%;
+  opacity: 1;
+}
+    
+    .line {
+      margin: 0;
+      padding: 5px 0;
+      overflow: hidden;
+    }
+
+    .typing-line {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  border-right: none;
+  transition: width 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.typing-line.visible {
+  width: 100%;
+  opacity: 1;
+}
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: #ff4d4d }
+    }
+    
+    .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    
+    #player {
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1s ease;
+      display: none;
+    }
+    
+    #player.visible {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+    }
+    
+    .apple-player {
+      background-color: rgba(40, 40, 40, 0.95);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+    
+    .player-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .song-info {
+      text-align: left;
+    }
+    
+    .song-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: white;
+    }
+    
+    .song-artist {
+      font-size: 16px;
+      color: #b3b3b3;
+    }
+    
+    .play-button {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .play-button:hover {
+      transform: scale(1.1);
+    }
+    
+    .progress-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
+    .time {
+      font-size: 12px;
+      color: #b3b3b3;
+      width: 40px;
+    }
+    
+    .progress-bar {
+      flex-grow: 1;
+      height: 5px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 2.5px;
+      margin: 0 10px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .progress {
+      position: absolute;
+      height: 100%;
+      background-color: #e60000;
+      border-radius: 2.5px;
+      width: 0%;
+    }
+    
+    .audio-note {
+      font-size: 12px;
+      color: #b3b3b3;
+      margin-top: 15px;
+    }
+    
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .heart {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff4d4d'/%3E%3C/svg%3E") no-repeat center center;
+      opacity: 0;
+      animation: fall linear forwards;
+      z-index: -1;
+    }
+    
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    .shine-button {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shine-button:after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(60deg, rgba(255,255,255,0) 10%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0) 30%);
+      transform: rotate(30deg);
+      transition: 0.5s;
+    }
+    
+    .shine-button:hover:after, .shine-button:active:after {
+      left: 100%;
+      transition: 0.7s;
+    }
+    
+    /* Стиль для кнопки с эффектом пульсации */
+    .pulse-button {
+      animation: pulse 1.5s infinite;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(230, 0, 0, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(230, 0, 0, 0);
+      }
+    }
+    
+    /* Стиль для убегающей кнопки */
+    .runaway-btn {
+      position: relative;
+      z-index: 10;
+      touch-action: manipulation;
+    }
+    
+    /* Стили для конверта */
+    .envelope {
+      width: 300px;
+      height: 200px;
+      background-color: #cc0000;
+      margin: 0 auto 40px;
+      position: relative;
+      border-radius: 5px;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+      cursor: pointer;
+      transition: all 0.5s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .envelope:hover, .envelope:active {
+      transform: scale(1.05);
+      animation: none;
+    }
+    
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background-color: #cc0000;
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+      transform-origin: top;
+      transition: transform 0.6s ease;
+      transform: rotateX(0deg);
+      z-index: 2;
+      border-radius: 5px 5px 0 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .envelope.open .envelope-flap {
+      transform: rotateX(180deg);
+    }
+    
+    .envelope-body {
+      width: 100%;
+      height: 100%;
+      background-color: #e60000;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .envelope-content {
+      background-color: white;
+      width: 90%;
+      height: 80%;
+      color: #cc0000;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.5s ease;
+      transform: translateY(100%);
+      font-size: 24px;
+      border-radius: 3px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .envelope.open .envelope-content {
+      transform: translateY(0);
+    }
+    
+    /* Дополнительные декоративные элементы */
+    .envelope:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 80%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      z-index: 1;
+      border-radius: 50%;
+    }
+    
+    .envelope:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .envelope {
+        width: 250px;
+        height: 170px;
+      }
+      
+      button {
+        padding: 12px 25px;
+        font-size: 16px;
+      }
+      
+      #lyrics {
+        font-size: 18px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts"></div>
+  <div class="container">
+    <h1>С Первомаем, дорогая! ❤️</h1>
+
+    <!-- Красивый конверт -->
+    <div class="envelope" id="envelope">
+      <div class="envelope-flap"></div>
+      <div class="envelope-body">
+        <div class="envelope-content">Открой меня!</div>
+      </div>
+    </div>
+    
+    <!-- Кнопка для открытия послания -->
+    <button id="show-message-btn" class="shine-button pulse-button">Открыть послание</button>
+    
+    <!-- Скрытое содержимое -->
+    <div id="lyrics">
+        <p class="line"><span class="typing-line">С первомаем, дорогая!</span></p>
+        <p class="line"><span class="typing-line">С этим ясным весенним днём!</span></p>
+        <p class="line"><span class="typing-line">Мы и в семнадцатом году порвали</span></p>
+        <p class="line"><span class="typing-line">Мы и в две тысячи двенадцатом порвём!</span></p>
+        <p class="line"><span class="typing-line">Пускай буржуй-эксплуататор знает</span></p>
+        <p class="line"><span class="typing-line">Что мы будем стоять до конца!</span></p>
+        <p class="line"><span class="typing-line">Развевается красное знамя</span></p>
+        <p class="line"><span class="typing-line">В наших красных сердцах!</span></p>
+        <p class="line"><span class="typing-line">В наших красных сердцах!</span></p>
+      </div>
+
+    <!-- Аудиоплеер -->
+    <div id="player">
+      <div class="apple-player">
+        <div class="player-info">
+          <div class="song-info">
+            <div class="song-title">С первомаем</div>
+            <div class="song-artist">Валентин Стрыкало</div>
+          </div>
+          <div id="playPauseBtn" class="play-button">
+            <svg viewBox="0 0 24 24" width="40" height="40">
+              <circle cx="12" cy="12" r="10" fill="#e60000" />
+              <path id="play-icon" d="M16 12L10 16V8L16 12Z" fill="white" />
+              <path id="pause-icon" class="hidden" d="M9 8H11V16H9V8ZM13 8H15V16H13V8Z" fill="white" />
+            </svg>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div id="current-time" class="time">0:00</div>
+          <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+          </div>
+          <div id="duration" class="time">0:00</div>
+        </div>
+        <audio id="audio-player">
+          <source src="Первомай.mp3" type="audio/mpeg">
+          Ваш браузер не поддерживает аудио-элемент.
+        </audio>
+        <p class="audio-note"><em>@кек</em></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Функция для обработки клика по конверту (работает и на мобильных устройствах)
+    document.getElementById("envelope").addEventListener("click", function() {
+      this.classList.add("open");
+      setTimeout(() => {
+        // Показываем кнопку и добавляем анимацию появления
+        const showBtn = document.getElementById("show-message-btn");
+        showBtn.style.display = "block";
+        showBtn.style.opacity = "0";
+        showBtn.style.transform = "translateY(20px)";
+        
+        // Анимируем появление кнопки
+        setTimeout(() => {
+          showBtn.style.transition = "all 0.5s ease";
+          showBtn.style.opacity = "1";
+          showBtn.style.transform = "translateY(0)";
+        }, 100);
+      }, 1000);
+    });
+    
+    // Настройка убегающей кнопки (работает и на мобильных устройствах)
+    const showMessageBtn = document.getElementById("show-message-btn");
+    showMessageBtn.classList.add("runaway-btn");
+    let runCounter = 0;
+    const maxRuns = 6; // Количество убеганий перед тем, как позволить нажать на кнопку
+    let canBeClicked = false;
+    
+    function handleButtonInteraction(e) {
+  if (runCounter < maxRuns) {
+    e.preventDefault();
+    
+    const btn = this;
+    const btnRect = btn.getBoundingClientRect();
+    const btnWidth = btnRect.width;
+    const btnHeight = btnRect.height;
+    
+    // Получаем размеры контейнера для ограничения перемещения
+    const container = document.querySelector(".container");
+    const containerRect = container.getBoundingClientRect();
+    
+    // Определяем, мобильное устройство или нет
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Для мобильных устройств делаем больший разброс по вертикали
+    const maxYMovement = isMobile ? 150 : 100;
+    const minYMovement = isMobile ? -150 : -100;
+    
+    // Вычисляем новые координаты в пределах контейнера
+    let newX, newY;
+    
+    // Для мобильных устройств иногда перемещаем кнопку в противоположную сторону
+    if (isMobile && runCounter % 2 === 0) {
+      newX = Math.max(20, Math.min(containerRect.width - btnWidth - 20, btnRect.left - btnWidth));
+      newY = Math.max(20, Math.min(containerRect.height - btnHeight - 20, btnRect.top + (Math.random() * maxYMovement + minYMovement)));
+    } else {
+      newX = Math.random() * (containerRect.width - btnWidth - 40) + 20;
+      newY = Math.random() * (maxYMovement - minYMovement) + minYMovement;
+    }
+    
+    // Ограничиваем в пределах контейнера
+    newY = Math.max(20, Math.min(newY, containerRect.height - btnHeight - 20));
+    
+    // Добавляем небольшую задержку перед перемещением для мобильных устройств
+    if (isMobile) {
+      btn.style.transition = "none";
+      btn.style.transform = `translate(${newX}px, ${newY}px) scale(0.95)`;
+      
+      setTimeout(() => {
+        btn.style.transition = "transform 0.3s ease-out";
+        btn.style.transform = `translate(${newX}px, ${newY}px) scale(1)`;
+      }, 50);
+    } else {
+      btn.style.transition = "transform 0.3s ease-out";
+      btn.style.transform = `translate(${newX}px, ${newY}px)`;
+    }
+    
+    runCounter++;
+    
+    // Если это последний раз убегания, меняем стиль кнопки
+    if (runCounter === maxRuns) {
+      btn.style.backgroundColor = "#4caf50";
+      btn.textContent = "Вот теперь точно нажимай!";
+      btn.style.animation = "victory-pulse 1s infinite";
+      btn.style.boxShadow = "0 0 15px rgba(76, 175, 80, 0.7)";
+      canBeClicked = true;
+      
+      // Для мобильных - центрируем кнопку
+      if (isMobile) {
+        setTimeout(() => {
+          btn.style.transition = "all 0.5s ease";
+          btn.style.transform = "translate(0, 0)";
+        }, 300);
+      }
+    } else {
+      const texts = [
+        "Люблю тебя)",
+        "Ха-ха, не поймаешь!",
+        "Еще попытка!",
+        "Почти получилось!",
+        "Последняя попытка!",
+        "Ладно наебал))"
+      ];
+      btn.textContent = texts[runCounter - 1];
+    }
+  }
+}
+    
+    // Добавляем обработчики для мобильных устройств и десктопов
+    showMessageBtn.addEventListener("mouseover", handleButtonInteraction);
+    showMessageBtn.addEventListener("touchstart", handleButtonInteraction, {passive: false});
+    
+    // Функция для показа послания
+    showMessageBtn.addEventListener("click", function(e) {
+      if (canBeClicked || runCounter >= maxRuns) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Скрываем кнопку
+        this.style.display = "none";
+        
+        // Показываем скрытые элементы
+        const lyrics = document.getElementById("lyrics");
+        const player = document.getElementById("player");
+        
+        // Сначала показываем контейнер для текста, но не сам текст
+        lyrics.style.display = "block";
+        setTimeout(() => {
+          lyrics.classList.add("visible");
+        }, 100);
+        
+        // Показываем плеер
+        player.style.display = "block";
+        setTimeout(() => {
+          player.classList.add("visible");
+          
+          // Автоматически запускаем музыку
+          const audioPlayer = document.getElementById("audio-player");
+          const playIcon = document.getElementById("play-icon");
+          const pauseIcon = document.getElementById("pause-icon");
+          
+          setTimeout(() => {
+            audioPlayer.currentTime = 51; // старт с 50 секунды
+            audioPlayer.play().catch(e => console.log("Автовоспроизведение заблокировано:", e));
+            playIcon.classList.add("hidden");
+            pauseIcon.classList.remove("hidden");
+            
+            animateText();
+          }, 500);
+        }, 300);
+        
+        // Генерируем сердечки (больше и чаще)
+        createHearts();
+        setInterval(createHearts, 3000);
+      }
+    });
+    
+    // Анимация текста
+    function animateText() {
+      const lines = document.querySelectorAll(".typing-line");
+      let delay = 0;
+      const typingDuration = 4000; 
+      
+      // Сначала скрываем все строки
+      lines.forEach(line => {
+        line.style.width = "0";
+        line.style.animation = "none";
+      });
+      
+      // Затем анимируем каждую строку по очереди
+      lines.forEach((line, index) => {
+        setTimeout(() => {
+          // Устанавливаем анимацию для текущей строки
+          line.style.animation = `typing ${typingDuration/1000}s steps(${line.textContent.length}, end) forwards, blink-caret 0.75s step-end infinite`;
+          
+          // Если это последняя строка, прокручиваем к лирике
+          if (index === lines.length - 1) {
+            setTimeout(() => {
+              document.getElementById("lyrics").scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+          }
+        }, delay);
+        
+        // Увеличиваем задержку для следующей строки на время анимации текущей
+        delay += typingDuration;
+      });
+    }
+    
+    // Функционал аудиоплеера в стиле Apple
+    const audioPlayer = document.getElementById("audio-player");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const playIcon = document.getElementById("play-icon");
+    const pauseIcon = document.getElementById("pause-icon");
+    const progressBar = document.getElementById("progress");
+    const progressContainer = document.querySelector(".progress-bar");
+    const currentTimeElement = document.getElementById("current-time");
+    const durationElement = document.getElementById("duration");
+    
+    // Функция воспроизведения/паузы
+    playPauseBtn.addEventListener("click", function() {
+      if (audioPlayer.paused) {
+        audioPlayer.play();
+        playIcon.classList.add("hidden");
+        pauseIcon.classList.remove("hidden");
+      } else {
+        audioPlayer.pause();
+        playIcon.classList.remove("hidden");
+        pauseIcon.classList.add("hidden");
+      }
+    });
+    
+    // Обновление времени и прогресс-бара
+    audioPlayer.addEventListener("timeupdate", function() {
+      const currentTime = audioPlayer.currentTime;
+      const duration = audioPlayer.duration || 0;
+      
+      // Обновляем прогресс-бар
+      const progressPercent = (currentTime / duration) * 100;
+      progressBar.style.width = progressPercent + "%";
+      
+      // Обновляем текущее время
+      currentTimeElement.textContent = formatTime(currentTime);
+    });
+    
+    // Событие загрузки метаданных (для получения длительности)
+    audioPlayer.addEventListener("loadedmetadata", function() {
+      durationElement.textContent = formatTime(audioPlayer.duration);
+    });
+    
+    // Событие окончания песни
+    audioPlayer.addEventListener("ended", function() {
+      playIcon.classList.remove("hidden");
+      pauseIcon.classList.add("hidden");
+      progressBar.style.width = "0%";
+      audioPlayer.currentTime = 0;
+    });
+    
+    // Клик по прогресс-бару для перемотки
+    progressContainer.addEventListener("click", function(e) {
+      const rect = progressContainer.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      audioPlayer.currentTime = percent * audioPlayer.duration;
+    });
+    
+    // Форматирование времени в минуты:секунды
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec < 10 ? '0' + sec : sec}`;
+    }
+    
+    // Функция для создания эффекта падающих сердечек (теперь их больше)
+    function createHearts() {
+      const heartsContainer = document.getElementById("hearts");
+      const numberOfHearts = 50; // Увеличили количество сердечек
+      
+      for (let i = 0; i < numberOfHearts; i++) {
+        setTimeout(() => {
+          const heart = document.createElement("div");
+          heart.classList.add("heart");
+          
+          // Случайное начальное положение
+          const startPositionX = Math.random() * window.innerWidth;
+          heart.style.left = startPositionX + "px";
+          heart.style.top = "-30px";
+          
+          // Случайный размер
+          const size = Math.random() * 30 + 15; // Увеличили размер сердечек
+          heart.style.width = size + "px";
+          heart.style.height = size + "px";
+          
+          // Случайная скорость анимации
+          const animationDuration = Math.random() * 4 + 2; // Разные скорости
+          heart.style.animationDuration = animationDuration + "s";
+          
+          // Случайный поворот
+          heart.style.transform = `rotate(${Math.random() * 360}deg)`;
+          
+          heartsContainer.appendChild(heart);
+          
+          // Удаляем сердечко после окончания анимации
+          setTimeout(() => {
+            heart.remove();
+          }, animationDuration * 1000);
+          
+        }, i * 100); // Уменьшили задержку между сердечками
+      }
+    }
+    
+    // Создаем первые сердечки при загрузке страницы
+    createHearts();
+  </script>
+</body>
+</html>
